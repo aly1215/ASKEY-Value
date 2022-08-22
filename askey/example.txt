@@ -1,0 +1,4 @@
+long long int t;
+ if(b==1)
+  return a;
+ t=power(a,b/2,mod);

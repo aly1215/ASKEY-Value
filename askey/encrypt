@@ -1,0 +1,76 @@
+#include<stdio.h>
+#include<string.h>
+int encryptd(FILE *);
+int main(void)
+{
+    FILE *fileptr;
+    int recode;
+
+    char fname[25];
+
+    printf("Enter a file to encrypt:");
+    scanf("%s", fname);
+
+    fileptr=fopen(fname, "w+");
+
+    if(fileptr == NULL){
+               printf("Failed to open file.\n");
+               return -1;
+               }
+    else
+               fprintf(fileptr,"text\n");           //place text into file
+
+
+    recode=encryptd(fileptr);
+
+    fclose(fileptr);
+
+    system("pause");
+    return 0;
+
+}
+int encryptd(FILE *dskfileptr)
+{
+    int i;                               //used to index through file buffer
+    unsigned long int file_s;            //holds number of bytes in file
+    int keylen;                          //holds length of key
+    char *filebuff = NULL;
+
+    char key[]="ABCDEF";
+
+    keylen=strlen(key);
+
+    fseek(dskfileptr, 0, SEEK_END);      //moves file pointer to end of file
+    file_s = ftell(dskfileptr);          //get current file pointer location
+                                         //which will be the size of the file
+    rewind(dskfileptr);                  //in bytes
+
+    filebuff = malloc(file_s);
+
+    //read file bytes into RAM filebuff (which is just an array of chars)
+    if(fread(filebuff, file_s, 1, dskfileptr) != 1)
+    {
+                       printf("Error in reading file.\n");
+                       return -1;
+                       }
+
+    for(i=0; i<file_s; i++) //look through each byte of filebuff
+    {
+             filebuff[i]=filebuff[i] ^ key[i%keylen];
+             }
+
+    rewind(dskfileptr);                   //move file pointer back to the beginning
+                                          //of the file
+    //write encrypted bytes (in filebuff) back to disk file
+    if(fwrite(filebuff, file_s, 1, dskfileptr) != 1)
+    {
+                        printf("Error in writing encrypted data to file.\n");
+                        system("pause");
+                        return -1;
+                        }
+
+    free(filebuff);                       //returning RAM membory back to system
+    fclose(dskfileptr);
+
+    return 0;
+}
